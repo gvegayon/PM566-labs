@@ -221,7 +221,8 @@ met_stations[, windsp50s := quantile(wind.sp, probs = .5, na.rm = TRUE), by = ST
 # Temperature
 met_stations[, tempdif  := which.min(abs(temp - temp50s)), by=STATE]
 met_stations[, recordid := 1:.N, by = STATE]
-met_stations[recordid == tempdif, .(USAFID, temp, temp50s, STATE)]
+met_temp <- met_stations[recordid == tempdif, .(USAFID, temp, temp50s, STATE)]
+met_temp
 ```
 
     ##     USAFID     temp  temp50s STATE
@@ -419,7 +420,8 @@ met_stations[, lon_mid := quantile(lon, probs = .5, na.rm = TRUE), by = STATE]
 met_stations[,  distance := sqrt((lat - lat_mid)^2 + (lon - lon_mid)^2)]
 met_stations[, minrecord := which.min(distance), by = STATE]
 met_stations[, n := 1:.N, by = STATE]
-met_stations[n == minrecord, .(USAFID, STATE, lon, lat)]
+met_location <- met_stations[n == minrecord, .(USAFID, STATE, lon, lat)]
+met_location
 ```
 
     ##     USAFID STATE      lon    lat
@@ -472,6 +474,49 @@ met_stations[n == minrecord, .(USAFID, STATE, lon, lat)]
     ## 47: 726720    WY -108.450 43.067
     ## 48: 726770    MT -108.533 45.800
     ##     USAFID STATE      lon    lat
+
+``` r
+all_stations <- met[, .(USAFID, lat, lon, STATE)][, .SD[1], by = "USAFID"]
+
+# Recovering lon and lat from the original dataset
+met_temp <- merge(
+  x = met_temp,
+  y = all_stations,
+  by = "USAFID",
+  all.x = TRUE, all.y = FALSE
+)
+```
+
+``` r
+library(leaflet)
+
+# Combining datasets
+dat1 <- met_location[, .(lon, lat)]
+dat1[, type := "Center of the state"]
+
+# Combining datasets
+dat2 <- met_temp[, .(lon, lat)]
+dat2[, type := "Center of the temperature"]
+
+dat <- rbind(dat1, dat2)
+
+# Copy paste from previous lab
+rh_pal <- colorFactor(c('blue', 'red'),
+                       domain = as.factor(dat$type))
+leaflet(dat) %>%
+  addProviderTiles("OpenStreetMap") %>%
+  addCircles(lng = ~lon, lat = ~lat, color=~rh_pal(type), opacity=1,fillOpacity=1, radius=500)
+```
+
+<!--html_preserve-->
+
+<div id="htmlwidget-0e03da8fd2f735cf014e" class="leaflet html-widget" style="width:672px;height:480px;">
+
+</div>
+
+<script type="application/json" data-for="htmlwidget-0e03da8fd2f735cf014e">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["OpenStreetMap",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addCircles","args":[[39,47.104,35.6,37.578,30.558,37.4,34.283,48.39,40.28,28.29,32.633,35.582,32.383,32.317,31.083,35.003,33.467,36.009,35.417,36.319,39.326,39.133,40.033,40.483,38.704,38.058,39.601,41.51,41.876,41.597,40.217,41.702,40.648,43.322,41.691,40.967,40.219,43.5,42.367,44.533,44.534,43.567,39.05,44.359,44.381,44.859,43.067,45.8,45.417,46.683,42.574,39,41.384,30.46,34.717,38.35,48.784,30.033,29.445,35.438,44.523,35.211,33.355,38.533,37.033,31.183,28.85,38.586,32.167,32.867,35.867,36.009,36.744,40.033,39.674,40.82,40.412,39.135,39.909,38.051,42.571,41.91,41.733,41.333,41.914,40.717,42.4,40.219,44.533,43.344,43.626,43.156,43.683,45.604,44.339,46.358],[-80.274,-122.287,-92.45,-84.77,-92.099,-77.517,-80.567,-100.024,-83.115,-81.437,-83.6,-79.101,-86.35,-90.083,-97.683,-105.662,-111.733,-86.52,-97.383,-119.628,-76.414,-75.467,-74.35,-88.95,-93.183,-97.275,-116.005,-72.828,-71.021,-71.412,-76.851,-74.795,-86.152,-84.688,-93.566,-98.317,-111.723,-114.3,-122.867,-69.667,-72.614,-71.433,-105.516,-89.837,-100.285,-94.382,-108.45,-108.533,-123.817,-122.983,-84.811,-80.274,-72.506,-87.877,-79.95,-93.683,-97.632,-85.533,-90.261,-94.803,-114.215,-91.738,-84.567,-76.033,-85.95,-90.471,-96.917,-77.711,-110.883,-117.133,-78.783,-86.52,-108.229,-74.35,-75.606,-82.518,-86.937,-96.679,-105.117,-117.09,-77.713,-70.729,-71.433,-75.717,-88.246,-99,-96.383,-111.723,-69.667,-72.518,-72.305,-90.678,-93.367,-103.546,-105.541,-104.25],500,null,null,{"interactive":true,"className":"","stroke":true,"color":["#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000"],"weight":5,"opacity":1,"fill":true,"fillColor":["#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000"],"fillOpacity":1},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null,null]}],"limits":{"lat":[28.29,48.784],"lng":[-123.817,-69.667]}},"evals":[],"jsHooks":[]}</script>
+
+<!--/html_preserve-->
 
 Knit the doc and save it on GitHub.
 
