@@ -1,8 +1,8 @@
 ---
 title: "Lab 05 - Data Wrangling"
 output:
-  - html_document
   - github_document
+  - html_document
 always_allow_html: true
 ---
 
@@ -284,5 +284,11 @@ Knit the document, commit your changes, and push them to GitHub. If you'd like, 
 git commit -a -m "Finalizing lab 5 https://github.com/USCbiostats/PM566/issues/23"
 ```
 
+# Last notes
 
+If you want to render all formats specified at the top of the yaml file, you can do it using the following command:
+
+```r
+rmarkdown::render("README.Rmd", output_format = "all")
+```
 
