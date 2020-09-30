@@ -99,15 +99,16 @@ The Ids are wrapped around text in the following way: `<Id>... id number ...</Id
 we can use a regular expression that extract that information. Fill out the
 following lines of code:
 
-```{r get-ids, eval = FALSE}
+```{r get-ids, eval = TRUE}
 # Turn the result into a character vector
 ids <- as.character(ids)
+# cat(ids)
 
 # Find all the ids 
-ids <- stringr::str_extract_all(ids, "PATTERN")[[1]]
+ids <- stringr::str_extract_all(ids, "<Id>[0-9]+</Id>")[[1]]
 
-# Remove all the leading and trailing <Id> </Id>. Make use of "|"
-ids <- stringr::str_remove_all(ids, "PATTERN")
+# Remove all the leading and trailing <Id> </Id>. Make use of "|" ?
+ids <- stringr::str_remove_all(ids, "</?Id>")
 ```
 
 With the ids in hand, we can now try to get the abstracts of the papers. As
