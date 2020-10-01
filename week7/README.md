@@ -385,3 +385,6 @@ For example, if we wanted to add a direct link the HTML page of lecture
 ``` md
 View [here](https://ghcdn.rawgit.org/USCbiostats/PM566/master/static/slides/07-apis-regex/slides.html)
 ```
+
+View
+[here](https://ghcdn.rawgit.org/gvegayon/PM566-labs/master/week7/README.html).
