@@ -97,6 +97,7 @@ my_boot <- function(dat, stat, R, ncpus = 1L) {
   # Making the cluster using `ncpus`
   # STEP 1: Make cluster
   cl <- makePSOCKcluster(ncpus)
+  # on.exit(stopCluster(cl))
   
   # STEP 2: Set it up (export data if needed), idx, dat
   clusterExport(cl, varlist = c("idx", "dat", "stat"), envir = environment())
@@ -157,9 +158,9 @@ ans0
 2. Check whether your version actually goes faster than the non-parallel version:
 
 
-```{r benchmark-problem3, eval = FALSE}
-system.time(my_boot(dat = data.frame(x, y), mi_stat, R = 1000, ncpus = 1L))
-system.time(my_boot(dat = data.frame(x, y), mi_stat, R = 1000, ncpus = 2L))
+```{r benchmark-problem3, eval = TRUE, cache=TRUE}
+system.time(my_boot(dat = data.frame(x, y), my_stat, R = 3000, ncpus = 1L))
+system.time(my_boot(dat = data.frame(x, y), my_stat, R = 3000, ncpus = 2))
 ```
 
 ## Problem 4: Compile this markdown document using Rscript

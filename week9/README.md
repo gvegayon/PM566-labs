@@ -53,9 +53,9 @@ microbenchmark::microbenchmark(
 ```
 
     ## Unit: relative
-    ##          expr     min       lq     mean   median       uq      max neval
-    ##     fun1(100) 17.8626 21.29884 11.49104 18.70386 19.94555 4.973553   100
-    ##  fun1alt(100)  1.0000  1.00000  1.00000  1.00000  1.00000 1.000000   100
+    ##          expr      min       lq     mean   median       uq      max neval
+    ##     fun1(100) 17.82591 21.34496 14.46409 20.90626 19.94069 7.977428   100
+    ##  fun1alt(100)  1.00000  1.00000  1.00000  1.00000  1.00000 1.000000   100
 
 2.  Find the column max (hint: Checkout the function `max.col()`).
 
@@ -84,9 +84,9 @@ microbenchmark::microbenchmark(
 ```
 
     ## Unit: relative
-    ##        expr      min       lq     mean   median       uq      max neval
-    ##     fun2(x) 10.75362 9.677487 8.037006 8.675284 10.51293 1.154117   100
-    ##  fun2alt(x)  1.00000 1.000000 1.000000 1.000000  1.00000 1.000000   100
+    ##        expr      min       lq     mean median       uq     max neval
+    ##     fun2(x) 10.97974 10.05044 8.211693 8.5157 8.411242 1.95317   100
+    ##  fun2alt(x)  1.00000  1.00000 1.000000 1.0000 1.000000 1.00000   100
 
 ## Problem 3: Parallelize everyhing
 
@@ -113,6 +113,7 @@ my_boot <- function(dat, stat, R, ncpus = 1L) {
   # Making the cluster using `ncpus`
   # STEP 1: Make cluster
   cl <- makePSOCKcluster(ncpus)
+  # on.exit(stopCluster(cl))
   
   # STEP 2: Set it up (export data if needed), idx, dat
   clusterExport(cl, varlist = c("idx", "dat", "stat"), envir = environment())
@@ -192,9 +193,18 @@ ans0
 <!-- end list -->
 
 ``` r
-system.time(my_boot(dat = data.frame(x, y), mi_stat, R = 1000, ncpus = 1L))
-system.time(my_boot(dat = data.frame(x, y), mi_stat, R = 1000, ncpus = 2L))
+system.time(my_boot(dat = data.frame(x, y), my_stat, R = 3000, ncpus = 1L))
 ```
+
+    ##    user  system elapsed 
+    ##   0.092   0.020   4.084
+
+``` r
+system.time(my_boot(dat = data.frame(x, y), my_stat, R = 3000, ncpus = 2))
+```
+
+    ##    user  system elapsed 
+    ##   0.159   0.016   2.605
 
 ## Problem 4: Compile this markdown document using Rscript
 
