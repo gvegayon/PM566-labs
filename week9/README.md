@@ -54,8 +54,8 @@ microbenchmark::microbenchmark(
 
     ## Unit: relative
     ##          expr      min       lq     mean   median       uq      max neval
-    ##     fun1(100) 17.82591 21.34496 14.46409 20.90626 19.94069 7.977428   100
-    ##  fun1alt(100)  1.00000  1.00000  1.00000  1.00000  1.00000 1.000000   100
+    ##     fun1(100) 17.04259 19.97847 16.80259 19.34282 21.49588 10.72377   100
+    ##  fun1alt(100)  1.00000  1.00000  1.00000  1.00000  1.00000  1.00000   100
 
 2.  Find the column max (hint: Checkout the function `max.col()`).
 
@@ -77,16 +77,14 @@ fun2alt <- function(x) {
 }
 
 # Benchmarking
-microbenchmark::microbenchmark(
+ans_benchmark <- microbenchmark::microbenchmark(
   fun2(x),
   fun2alt(x), unit = "relative"
 )
+plot(ans_benchmark)
 ```
 
-    ## Unit: relative
-    ##        expr      min       lq     mean median       uq     max neval
-    ##     fun2(x) 10.97974 10.05044 8.211693 8.5157 8.411242 1.95317   100
-    ##  fun2alt(x)  1.00000  1.00000 1.000000 1.0000 1.000000 1.00000   100
+![](README_files/figure-gfm/p2-fun2-1.png)<!-- -->
 
 ## Problem 3: Parallelize everyhing
 
@@ -217,3 +215,9 @@ Rscript --vanilla -e 'rmarkdown::render("[full-path-to-your-Rmd-file.Rmd]")' &
 
 Where `[full-path-to-your-Rmd-file.Rmd]` should be replace with the full
 path to your Rmd file… :).
+
+In my case:
+
+``` bash
+Rscript --vanilla -e 'rmarkdown::render("~/Desktop/PM566-labs/week9/README.Rmd")'
+```

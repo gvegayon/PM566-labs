@@ -68,10 +68,11 @@ fun2alt <- function(x) {
 }
 
 # Benchmarking
-microbenchmark::microbenchmark(
+ans_benchmark <- microbenchmark::microbenchmark(
   fun2(x),
   fun2alt(x), unit = "relative"
 )
+plot(ans_benchmark)
 ```
 
 ## Problem 3: Parallelize everyhing
@@ -174,3 +175,10 @@ Rscript --vanilla -e 'rmarkdown::render("[full-path-to-your-Rmd-file.Rmd]")' &
 
 Where `[full-path-to-your-Rmd-file.Rmd]` should be replace with the full path to
 your Rmd file... :).
+
+In my case:
+
+```bash
+Rscript --vanilla -e 'rmarkdown::render("~/Desktop/PM566-labs/week9/README.Rmd")'
+```
+
