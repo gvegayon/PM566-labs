@@ -53,9 +53,9 @@ microbenchmark::microbenchmark(
 ```
 
     ## Unit: relative
-    ##          expr      min       lq     mean   median       uq     max neval
-    ##     fun1(100) 17.44504 19.25922 13.92681 23.12446 20.98032 6.24941   100
-    ##  fun1alt(100)  1.00000  1.00000  1.00000  1.00000  1.00000 1.00000   100
+    ##          expr     min       lq     mean   median       uq      max neval
+    ##     fun1(100) 17.8626 21.29884 11.49104 18.70386 19.94555 4.973553   100
+    ##  fun1alt(100)  1.0000  1.00000  1.00000  1.00000  1.00000 1.000000   100
 
 2.  Find the column max (hint: Checkout the function `max.col()`).
 
@@ -84,9 +84,9 @@ microbenchmark::microbenchmark(
 ```
 
     ## Unit: relative
-    ##        expr     min       lq     mean   median      uq     max neval
-    ##     fun2(x) 10.7629 10.49069 5.906112 9.799008 11.4945 0.33732   100
-    ##  fun2alt(x)  1.0000  1.00000 1.000000 1.000000  1.0000 1.00000   100
+    ##        expr      min       lq     mean   median       uq      max neval
+    ##     fun2(x) 10.75362 9.677487 8.037006 8.675284 10.51293 1.154117   100
+    ##  fun2alt(x)  1.00000 1.000000 1.000000 1.000000  1.00000 1.000000   100
 
 ## Problem 3: Parallelize everyhing
 
@@ -103,6 +103,7 @@ population.
 This function implements the non-parametric bootstrap:
 
 ``` r
+library(parallel)
 my_boot <- function(dat, stat, R, ncpus = 1L) {
   
   # Getting the random indices
@@ -110,18 +111,24 @@ my_boot <- function(dat, stat, R, ncpus = 1L) {
   idx <- matrix(sample.int(n, n*R, TRUE), nrow=n, ncol=R)
  
   # Making the cluster using `ncpus`
-  # STEP 1: GOES HERE
-  # STEP 2: GOES HERE
+  # STEP 1: Make cluster
+  cl <- makePSOCKcluster(ncpus)
   
-    # STEP 3: THIS FUNCTION NEEDS TO BE REPLACES WITH parLapply
-  ans <- lapply(seq_len(R), function(i) {
+  # STEP 2: Set it up (export data if needed), idx, dat
+  clusterExport(cl, varlist = c("idx", "dat", "stat"), envir = environment())
+  # clusterSetRNGStream(cl, 12312)
+  # clusterEvalQ(cl, library(ggplot2))
+  
+  # STEP 3: THIS FUNCTION NEEDS TO BE REPLACES WITH parLapply
+  ans <- parLapply(cl, seq_len(R), function(i) {
     stat(dat[idx[,i], , drop=FALSE])
   })
   
   # Coercing the list into a matrix
   ans <- do.call(rbind, ans)
   
-  # STEP 4: GOES HERE
+  # STEP 4: stop the cluster
+  stopCluster(cl)
   
   ans
   
@@ -139,20 +146,41 @@ my_stat <- function(d) coef(lm(y ~ x, data=d))
 
 # DATA SIM
 set.seed(1)
-n <- 500; R <- 1e4
+n <- 500
+R <- 1000
 
-x <- cbind(rnorm(n)); y <- x*5 + rnorm(n)
+x <- cbind(rnorm(n))
+y <- x*5 + rnorm(n)
 
 # Checking if we get something similar as lm
 ans0 <- confint(lm(y~x))
-ans1 <- my_boot(dat = data.frame(x, y), mi_stat, R = R, ncpus = 2L)
+ans1 <- my_boot(
+  dat   = data.frame(x, y),
+  stat  = my_stat,
+  R     = R,
+  ncpus = 2L
+  )
 
 # You should get something like this
 t(apply(ans1, 2, quantile, c(.025,.975)))
+```
+
+    ##                   2.5%      97.5%
+    ## (Intercept) -0.1430703 0.05292241
+    ## x            4.8685251 5.04843669
+
+``` r
 ##                   2.5%      97.5%
 ## (Intercept) -0.1372435 0.05074397
 ## x            4.8680977 5.04539763
 ans0
+```
+
+    ##                  2.5 %     97.5 %
+    ## (Intercept) -0.1379033 0.04797344
+    ## x            4.8650100 5.04883353
+
+``` r
 ##                  2.5 %     97.5 %
 ## (Intercept) -0.1379033 0.04797344
 ## x            4.8650100 5.04883353
@@ -164,8 +192,8 @@ ans0
 <!-- end list -->
 
 ``` r
-system.time(my_boot(dat = data.frame(x, y), mi_stat, R = 4000, ncpus = 1L))
-system.time(my_boot(dat = data.frame(x, y), mi_stat, R = 4000, ncpus = 2L))
+system.time(my_boot(dat = data.frame(x, y), mi_stat, R = 1000, ncpus = 1L))
+system.time(my_boot(dat = data.frame(x, y), mi_stat, R = 1000, ncpus = 2L))
 ```
 
 ## Problem 4: Compile this markdown document using Rscript
